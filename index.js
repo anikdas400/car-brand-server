@@ -31,25 +31,59 @@ async function run() {
     const carCollection = client.db('carDB').collection('car')
 
     // read
-    app.get('/cars',async(req,res)=>{
+    app.get('/cars', async (req, res) => {
       const cursor = carCollection.find();
       const result = await cursor.toArray();
       res.send(result)
     })
 
+    // update step-1
+    app.get('/cars/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await carCollection.findOne(query);
+      res.send(result);
+    })
+
 
     // create
-    app.post('/cars',async(req,res)=>{
+    app.post('/cars', async (req, res) => {
       const newCar = req.body;
       console.log(newCar)
       const result = await carCollection.insertOne(newCar)
       res.send(result)
     })
 
-    // delete
-    app.delete('/cars/:id',async(req,res)=>{
+    // brand,type,photo,price,description,rating
+    // update step-2
+    app.put('/cars/:id', async (req, res) => {
       const id = req.params.id;
-      const query ={_id: new ObjectId(id)}
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true };
+      const updatedCar = req.body;
+      const car = {
+
+        $set: {
+
+          brand: updatedCar.brand,
+          type: updatedCar.type,
+          photo: updatedCar.photo,
+          price: updatedCar.price,
+          description: updatedCar.description,
+          rating: updatedCar.rating,
+        }
+
+      }
+
+      const result = await carCollection.updateOne(filter,car,options);
+      res.send(result)
+      
+    })
+
+    // delete
+    app.delete('/cars/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
       const result = await carCollection.deleteOne(query)
       res.send(result)
     })
@@ -66,10 +100,10 @@ async function run() {
 run().catch(console.dir);
 
 
-app.get('/',(req,res)=>{
-    res.send('car brand server is running')
+app.get('/', (req, res) => {
+  res.send('car brand server is running')
 })
 
-app.listen(port,()=>{
-    console.log(`car server is running on port: ${port}`)
+app.listen(port, () => {
+  console.log(`car server is running on port: ${port}`)
 })
