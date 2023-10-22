@@ -30,6 +30,15 @@ async function run() {
 
     const carCollection = client.db('carDB').collection('car')
 
+    // read
+    app.get('/cars',async(req,res)=>{
+      const cursor = carCollection.find();
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+
+
+    // create
     app.post('/cars',async(req,res)=>{
       const newCar = req.body;
       console.log(newCar)
